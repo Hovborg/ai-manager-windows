@@ -266,7 +266,9 @@ try {
     $script:ui.Form.Size=$script:ui.Form.MinimumSize
     [Windows.Forms.Application]::DoEvents()
     foreach ($panel in $script:ui.ReleasePanels.Values) {
-        if ($panel.Body.ClientSize.Height -lt [int](70*$dpiFactor)) {throw 'Release notes have no usable reading area at minimum window size'}
+        if ($panel.Body.ClientSize.Height -lt [int](70*$dpiFactor)) {
+            throw "Release notes reading area too small: actual=$($panel.Body.ClientSize.Height), required=$([int](70*$dpiFactor)), DPI=$($script:ui.Form.DeviceDpi), form=$($script:ui.Form.Size), client=$($script:ui.Form.ClientSize), root rows=$($script:ui.Root.GetRowHeights() -join ','), panel rows=$($panel.Container.GetRowHeights() -join ',')"
+        }
     }
     $dpiUI=New-ManagerDashboard $catalog (Join-Path $PSScriptRoot '../ai-updater.ico')
     try {
