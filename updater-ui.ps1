@@ -237,8 +237,8 @@ function New-ManagerDashboard {
     $header.Dock='Fill'
     $header.RowCount=2
     $header.ColumnCount=2
-    [void]$header.RowStyles.Add([Windows.Forms.RowStyle]::new([Windows.Forms.SizeType]::Percent,64))
-    [void]$header.RowStyles.Add([Windows.Forms.RowStyle]::new([Windows.Forms.SizeType]::Percent,36))
+    [void]$header.RowStyles.Add([Windows.Forms.RowStyle]::new([Windows.Forms.SizeType]::Percent,65))
+    [void]$header.RowStyles.Add([Windows.Forms.RowStyle]::new([Windows.Forms.SizeType]::Percent,35))
     [void]$header.ColumnStyles.Add([Windows.Forms.ColumnStyle]::new([Windows.Forms.SizeType]::Percent,100))
     [void]$header.ColumnStyles.Add([Windows.Forms.ColumnStyle]::new([Windows.Forms.SizeType]::Absolute,92))
     $title=New-ManagerLabel 'AI Manager' 24 $true
