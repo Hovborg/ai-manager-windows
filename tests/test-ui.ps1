@@ -50,7 +50,9 @@ function Assert-DashboardTextFits {
             $visibleBounds=[Drawing.Rectangle]::Intersect($visibleBounds,$ancestor.RectangleToScreen($ancestor.ClientRectangle))
             $ancestor=$ancestor.Parent
         }
-        if ($textSize.Height -gt $visibleBounds.Height -or $textSize.Width -gt $visibleBounds.Width) {throw "Parent clips '$($control.Text)' at DPI $($UI.Form.DeviceDpi)"}
+        if ($textSize.Height -gt $visibleBounds.Height -or $textSize.Width -gt $visibleBounds.Width) {
+            throw "Parent clips '$($control.Text)' at DPI $($UI.Form.DeviceDpi): needed=$textSize, visible=$visibleBounds, control=$($control.Bounds), form=$($UI.Form.Size)"
+        }
     }
 }
 $catalog=@(Get-ToolCatalog)

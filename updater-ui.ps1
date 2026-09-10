@@ -238,6 +238,7 @@ function New-ManagerDashboard {
     $root.Dock='Fill'
     $root.ColumnCount=1
     $root.RowCount=7
+    [void]$root.ColumnStyles.Add([Windows.Forms.ColumnStyle]::new([Windows.Forms.SizeType]::Percent,100))
     $root.Padding=[Windows.Forms.Padding]::new(22,12,22,10)
     foreach ($height in @(76,78,54)) {
         [void]$root.RowStyles.Add([Windows.Forms.RowStyle]::new([Windows.Forms.SizeType]::Absolute,$height))
