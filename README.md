@@ -33,6 +33,7 @@ The screenshots above are actual WinForms renders produced by `tests/test-ui.ps1
 ## Requirements
 
 - Windows with Windows Forms and Task Scheduler available
+- A desktop working area at least 880 logical pixels wide (about 1540 physical pixels at 175% scaling)
 - PowerShell 7, installed using its Microsoft Store app alias or the default MSI location (`%ProgramFiles%\PowerShell\7\pwsh.exe`)
 - WinGet for desktop-app and GitHub CLI package operations
 - Network access to publisher version and release-note sources when checking

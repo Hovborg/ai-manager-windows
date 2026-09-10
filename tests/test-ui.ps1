@@ -294,6 +294,10 @@ try {
     } finally {$script:ui.Form.MinimumSize=$savedMinimum}
     $dpiUI=New-ManagerDashboard $catalog (Join-Path $PSScriptRoot '../ai-updater.ico')
     try {
+        # Test the requested 880-logical-pixel layout independently of the
+        # runner's physical monitor size. Default Windows tracking limits
+        # can otherwise clamp this synthetic 175% form to only 1044 pixels.
+        $dpiUI.Form.MaximumSize=[Drawing.Size]::new(4096,4096)
         $dpiUI.Form.Show()
         Set-DashboardStatus $dpiUI $map $false
         $currentDpiFactor=$dpiUI.Form.DeviceDpi/96.0
@@ -303,6 +307,7 @@ try {
         }
         $dpiUI.Form.Width=[int](880*1.75)
         [Windows.Forms.Application]::DoEvents()
+        if ($dpiUI.Form.Width -ne [int](880*1.75)) {throw 'The synthetic 175 percent viewport was clamped by the test desktop'}
         Assert-DashboardTextFits $dpiUI
         if ($dpiUI.Form.AutoScaleMode -ne 'Dpi' -or $dpiUI.CardPanel.HorizontalScroll.Visible) {throw 'Dashboard does not remain DPI-aware at 175 percent'}
         foreach ($card in $dpiUI.Cards.Values) {
