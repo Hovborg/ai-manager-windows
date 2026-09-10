@@ -270,6 +270,26 @@ try {
             throw "Release notes reading area too small: actual=$($panel.Body.ClientSize.Height), required=$([int](70*$dpiFactor)), DPI=$($script:ui.Form.DeviceDpi), form=$($script:ui.Form.Size), client=$($script:ui.Form.ClientSize), root rows=$($script:ui.Root.GetRowHeights() -join ','), panel rows=$($panel.Container.GetRowHeights() -join ',')"
         }
     }
+    # Reproduce a short working area like the Windows CI desktop, which can
+    # constrain the actual form below its requested 800-pixel minimum.
+    $savedMinimum=$script:ui.Form.MinimumSize
+    try {
+        $script:ui.Form.MinimumSize=[Drawing.Size]::new([int](880*$dpiFactor),[int](650*$dpiFactor))
+        $script:ui.Form.Height=[int](718*$dpiFactor)
+        foreach ($tabIndex in @(0,1)) {
+            $script:ui.ReleaseTabs.SelectedIndex=$tabIndex
+            [Windows.Forms.Application]::DoEvents()
+            $panels=if ($tabIndex -eq 0) {@($script:ui.ReleasePanels.Values)} else {@($script:ui.RangePanel)}
+            foreach ($panel in $panels) {
+                if ($panel.Body.ClientSize.Height -lt [int](70*$dpiFactor)) {throw 'Short desktop collapsed the release notes reading field'}
+                $panel.Container.ScrollControlIntoView($panel.Source)
+                [Windows.Forms.Application]::DoEvents()
+                $sourceBounds=$panel.Source.RectangleToScreen($panel.Source.ClientRectangle)
+                $viewport=$panel.Container.RectangleToScreen($panel.Container.ClientRectangle)
+                if (-not $viewport.Contains($sourceBounds)) {throw 'Release source button cannot be reached on a short desktop'}
+            }
+        }
+    } finally {$script:ui.Form.MinimumSize=$savedMinimum}
     $dpiUI=New-ManagerDashboard $catalog (Join-Path $PSScriptRoot '../ai-updater.ico')
     try {
         $dpiUI.Form.Show()

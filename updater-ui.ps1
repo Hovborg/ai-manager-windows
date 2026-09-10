@@ -39,6 +39,9 @@ function New-ReleaseNotesPanel {
     param([string]$Heading, [string]$Accent, [string]$AccessibleBodyName)
     $container=[Windows.Forms.TableLayoutPanel]::new()
     $container.Dock='Fill'
+    $container.AutoScroll=$true
+    # Small working areas can clamp the form below MinimumSize. Keep the
+    # reading field usable and let the complete panel scroll in that case.
     $container.RowCount=5
     $container.ColumnCount=1
     $container.Padding=[Windows.Forms.Padding]::new(18,14,18,16)
@@ -66,6 +69,7 @@ function New-ReleaseNotesPanel {
     $meta.Text='Afventer valg af værktøj'
     $body=[Windows.Forms.RichTextBox]::new()
     $body.Dock='Fill'
+    $body.MinimumSize=[Drawing.Size]::new(0,70)
     $body.ReadOnly=$true
     $body.BorderStyle='None'
     $body.ScrollBars='Vertical'
@@ -89,6 +93,18 @@ function New-ReleaseNotesPanel {
     $container.Controls.Add($meta,0,2)
     $container.Controls.Add($body,0,3)
     $container.Controls.Add($source,0,4)
+    $container.add_Layout({param($sender,$eventArgs)
+        $readingField=$sender.GetControlFromPosition(0,3)
+        if (-not $readingField) {return}
+        $minimumHeight=$sender.Padding.Vertical+$readingField.MinimumSize.Height+$readingField.Margin.Vertical
+        foreach ($row in $sender.RowStyles) {
+            if ($row.SizeType -eq [Windows.Forms.SizeType]::Absolute) {$minimumHeight+=$row.Height}
+        }
+        $minimumHeight=[int][Math]::Ceiling($minimumHeight)
+        if ($sender.AutoScrollMinSize.Height -ne $minimumHeight) {
+            $sender.AutoScrollMinSize=[Drawing.Size]::new(0,$minimumHeight)
+        }
+    })
     return @{Container=$container; Heading=$headingLabel; Version=$version; Meta=$meta; Body=$body; Source=$source}
 }
 
