@@ -1,0 +1,22 @@
+name: Synthetic tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Validate public package boundary
+        shell: pwsh
+        run: pwsh -NoProfile -NonInteractive -File .\tests\test-public-package.ps1
+      - name: Run isolated synthetic suite
+        shell: pwsh
+        run: pwsh -NoProfile -NonInteractive -STA -File .\tests\test-all.ps1

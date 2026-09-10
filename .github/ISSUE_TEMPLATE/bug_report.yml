@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a reproducible AI Manager problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please remove usernames, local paths, tokens, and other private data from logs before posting.
+  - type: input
+    id: powershell
+    attributes:
+      label: PowerShell version
+      description: Output of `pwsh --version`.
+    validations:
+      required: true
+  - type: input
+    id: winget
+    attributes:
+      label: WinGet version
+      description: Output of `winget --version`, or "not involved".
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: List the smallest sequence that reproduces the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Include the exact UI status or relevant sanitized log excerpt. Do not include credentials or private paths.

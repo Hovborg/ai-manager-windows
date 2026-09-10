@@ -1,0 +1,14 @@
+# Local runtime state and diagnostics
+state/
+artifacts/
+*.log
+*.tmp
+
+# PowerShell and editor leftovers
+*.ps1xml.tmp
+.vscode/
+.idea/
+
+# Windows filesystem metadata
+Thumbs.db
+Desktop.ini
