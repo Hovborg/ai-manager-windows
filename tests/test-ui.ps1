@@ -12,6 +12,19 @@ $ErrorActionPreference='Stop'
 . "$PSScriptRoot/../updater-ui.ps1"
 [void][Windows.Forms.Application]::SetHighDpiMode([Windows.Forms.HighDpiMode]::PerMonitorV2)
 [Windows.Forms.Application]::EnableVisualStyles()
+# A synthetic DPI viewport can exceed a hosted runner's physical desktop.
+# Form.SetBoundsCore clamps even an explicit MaximumSize to MaxWindowTrackSize;
+# resize only this test's HWND directly, without changing display settings.
+Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+public static class SyntheticViewportNative {
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetWindowPos(IntPtr window, IntPtr insertAfter,
+        int x, int y, int width, int height, uint flags);
+}
+'@
 $script:targets=[Collections.Generic.List[string]]::new()
 function Start-AsyncUpdate {param($Target) $script:targets.Add($Target)}
 $script:checks=0
@@ -305,9 +318,16 @@ try {
             $supplementalScale=1.75/$currentDpiFactor
             $dpiUI.Form.Scale([Drawing.SizeF]::new($supplementalScale,$supplementalScale))
         }
-        $dpiUI.Form.Width=[int](880*1.75)
+        $viewportWidth=[int](880*1.75)
+        $viewportHeight=[int](800*1.75)
+        # SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE: resize this test form only.
+        if (-not [SyntheticViewportNative]::SetWindowPos($dpiUI.Form.Handle,[IntPtr]::Zero,0,0,$viewportWidth,$viewportHeight,0x0016)) {
+            throw [ComponentModel.Win32Exception]::new([Runtime.InteropServices.Marshal]::GetLastWin32Error())
+        }
         [Windows.Forms.Application]::DoEvents()
-        if ($dpiUI.Form.Width -ne [int](880*1.75)) {throw 'The synthetic 175 percent viewport was clamped by the test desktop'}
+        if ($dpiUI.Form.Width -ne $viewportWidth -or $dpiUI.Form.Height -ne $viewportHeight) {
+            throw "The synthetic 175 percent viewport was clamped: actual=$($dpiUI.Form.Size), required=${viewportWidth}x${viewportHeight}"
+        }
         Assert-DashboardTextFits $dpiUI
         if ($dpiUI.Form.AutoScaleMode -ne 'Dpi' -or $dpiUI.CardPanel.HorizontalScroll.Visible) {throw 'Dashboard does not remain DPI-aware at 175 percent'}
         foreach ($card in $dpiUI.Cards.Values) {
